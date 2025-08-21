@@ -2,6 +2,7 @@ from agno.agent import Agent
 from agno.team import Team
 from agno.tools.tavily import TavilyTools
 from agno.tools.crawl4ai import Crawl4aiTools
+from agno.tools.youtube import YouTubeTools
 from agno.tools.browserbase import BrowserbaseTools
 # from agno.tools.firecrawl import FirecrawlTools
 from agno.tools.website import WebsiteTools
@@ -32,15 +33,13 @@ tech_ai_agent = Agent(
     tools=[
         TavilyTools(search_depth="advanced", max_tokens=8000),
         XTools(wait_on_rate_limit=True, include_post_metrics=True),
-        WebsiteTools()
+        WebsiteTools(),
+        YouTubeTools()
     ],
     instructions=f"""
     {open("prompts/tech_agent.md").read()}
     
-    IMPORTANTE: Hoje é {datetime.now().strftime('%d de %B de %Y')} (21 de agosto de 2025). 
-    Sempre faça buscas por informações ATUAIS de 2025. 
-    Quando pesquisar, inclua termos como "2025", "latest", "recent", "current".
-    Priorize fontes e notícias de 2025.
+    IMPORTANTE: Hoje é {datetime.now().strftime('%d de %B de %Y')}. 
     """,
     memory=memory,
     enable_agentic_memory=True,
@@ -71,15 +70,13 @@ finance_agent = Agent(
             technical_indicators=True,
             historical_prices=True
         ),
+        YouTubeTools(),
         calculate_portfolio_metrics
     ],
     instructions=f"""
     {open("prompts/finance_agent.md").read()}
     
-    IMPORTANTE: Hoje é {datetime.now().strftime('%d de %B de %Y')} (21 de agosto de 2025). 
-    Sempre busque dados financeiros ATUAIS e notícias de 2025.
-    Use termos como "2025", "Q1 2025", "Q2 2025", "Q3 2025", "latest earnings" nas suas pesquisas.
-    Priorize informações financeiras mais recentes de 2025.
+    IMPORTANTE: Hoje é {datetime.now().strftime('%d de %B de %Y')}.
     """,
     memory=memory,
     enable_agentic_memory=True,
@@ -97,7 +94,6 @@ intelligence_team = Team(
     mode="route",  # Roteamento inteligente baseado na consulta
     model=OpenAIChat(id="gpt-4.1-mini"),
     members=[tech_ai_agent, finance_agent],
-    tools=[ReasoningTools(add_instructions=True)],
     instructions="""
     Você é o líder de uma equipe de especialistas em tecnologia e finanças. Sua função é:
     
@@ -140,4 +136,4 @@ playground = Playground(
 app = playground.get_app()
 
 if __name__ == "__main__":
-    playground.serve(app="intelligence_team:app", reload=True)
+    playground.serve(app="intelligence_team:app", reload=True, port=8888)
